@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Socure — Applicant Fraud Outcomes</title>
+  <title>Socure — New Applicant Value ROI</title>
   <style>
 /* ============================================================
    Socure Outcomes — Apple-inspired design system
@@ -447,6 +447,22 @@ button.icon-btn { width: 32px; height: 32px; padding: 0; justify-content: center
   transition: transform var(--t), box-shadow var(--t), background var(--t-slow);
 }
 .summary-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-sm) }
+.comparison-card.sq-baseline { background: var(--surface-2); border-style: dashed }
+.comparison-card.sq-baseline h3 { color: var(--text-2) }
+.comparison-card.sq-baseline .comparison-metric strong { color: var(--text-2) }
+.lift-pills { display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 20px }
+.lift-pill {
+  padding: 8px 14px; border-radius: var(--radius-pill);
+  background: var(--green-50); border: 1px solid rgba(36, 138, 61, 0.15);
+  font-size: 13px; font-weight: 600; color: var(--green);
+}
+.inputs-panel .input-group { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid var(--border) }
+.inputs-panel .input-group:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0 }
+.inputs-panel .input-group h3 { margin: 0 0 12px; font-size: 14px; font-weight: 600; color: var(--text-2); letter-spacing: -0.01em }
+.story-panel { border-color: rgba(0, 71, 187, 0.15); box-shadow: var(--shadow-sm) }
+.roi-category .roi-category-value.muted { color: var(--text-3); font-size: 15px; font-weight: 500 }
+.roi-category .roi-note { margin: 10px 0 0; font-size: 11px; color: var(--text-3); line-height: 1.4 }
+
 .verify-panel { margin-bottom: 20px }
 .roi-total-banner {
   display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 12px;
@@ -472,6 +488,7 @@ button.icon-btn { width: 32px; height: 32px; padding: 0; justify-content: center
 .roi-compare { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: end; margin-bottom: 14px }
 .roi-compare-col label { display: block; margin-bottom: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-3) }
 .roi-compare-col input { font-size: 15px; font-weight: 600; text-align: center }
+.roi-compare-col strong { display: block; font-size: 22px; font-weight: 600; text-align: center; font-variant-numeric: tabular-nums; color: var(--text); padding: 8px 0 }
 .roi-compare-delta {
   padding: 8px 10px; border-radius: var(--radius-pill);
   background: var(--surface-2); border: 1px solid var(--border);
@@ -606,7 +623,7 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
   </style>
 </head>
 <body>
-<h2 class="sr-only">Socure applicant fraud outcomes — interactive confusion matrix</h2>
+<h2 class="sr-only">Socure new applicant value — status quo vs suite ROI</h2>
 
 <!-- Sticky metrics bar -->
 <div class="sticky-bar">
@@ -616,32 +633,27 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
   </div>
   <div class="bar-metrics">
     <div class="bar-metric">
-      <span class="bar-metric-label">Review rate</span>
-      <span class="bar-metric-value" id="bar-depth">—</span>
+      <span class="bar-metric-label">Total value</span>
+      <span class="bar-metric-value" id="bar-total-value">—</span>
     </div>
     <div class="bar-sep"></div>
     <div class="bar-metric">
-      <span class="bar-metric-label">Sent to review</span>
-      <span class="bar-metric-value" id="bar-flagged">—</span>
+      <span class="bar-metric-label">Auto-approval lift</span>
+      <span class="bar-metric-value" id="bar-auto-lift">—</span>
     </div>
     <div class="bar-sep"></div>
     <div class="bar-metric">
-      <span class="bar-metric-label">Fraud in population</span>
-      <span class="bar-metric-value" id="bar-fraud">—</span>
+      <span class="bar-metric-label">Fraud catch lift</span>
+      <span class="bar-metric-value" id="bar-fraud-lift">—</span>
     </div>
     <div class="bar-sep"></div>
     <div class="bar-metric">
-      <span class="bar-metric-label">Fraud caught</span>
-      <span class="bar-metric-value" id="bar-capture">—</span>
-    </div>
-    <div class="bar-sep"></div>
-    <div class="bar-metric">
-      <span class="bar-metric-label">Review precision</span>
-      <span class="bar-metric-value" id="bar-precision">—</span>
+      <span class="bar-metric-label">New good customers</span>
+      <span class="bar-metric-value" id="bar-incremental-customers">—</span>
     </div>
   </div>
   <div class="bar-right">
-    <span id="status-pill" class="pill">Population fraud rate</span>
+    <span id="status-pill" class="pill">Status quo vs Socure</span>
     <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">
       <svg id="icon-sun" viewBox="0 0 24 24" style="display:none">
         <circle cx="12" cy="12" r="4"/>
@@ -656,159 +668,50 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
 
 <div class="viz-wrap">
   <header class="hero">
-    <p class="eyebrow">Socure fraud detection</p>
-    <h1>Applicant outcomes at a glance</h1>
+    <p class="eyebrow">Socure new applicant value</p>
+    <h1>Status quo vs. Socure suite ROI</h1>
     <p>
-      This dashboard shows where applicants land when Socure models flag risk: fraud correctly caught,
-      fraud missed, legitimate applicants sent to review, and legitimate applicants auto-approved.
-      Adjust volume, fraud rate, and model settings below to explore a scenario.
+      Three steps: configure assumptions, tune Socure models, then read the ROI story.
+      Built for SC teams — inputs on top, customer-ready outputs in step 3.
     </p>
   </header>
 
-  <!-- ── Confusion matrix (primary view) ───────────────── -->
-  <section class="panel matrix-panel" aria-label="Applicant confusion matrix">
+  <!-- ── Step 1: Configure (team inputs) ─────────────── -->
+  <section class="panel inputs-panel" aria-label="Configure scenario">
     <div class="section-head">
-      <h2>Applicant confusion matrix</h2>
+      <h2>1. Configure your scenario</h2>
+      <span class="muted">Team inputs</span>
     </div>
-    <p class="matrix-intro">
-      Each applicant falls into one of four buckets. <strong>Rows</strong> are who they actually are;
-      <strong>columns</strong> are what Socure decided. The goal: maximize fraud caught (top-left)
-      while keeping false alarms (bottom-left) manageable.
-    </p>
+    <p class="section-intro">Set population, economics, and status quo baselines. Tune models in step 2 — the story updates automatically.</p>
 
-    <div class="explainer" aria-label="Matrix legend">
-      <article class="explainer-card tp">
-        <strong>Fraud caught</strong>
-        <p>Actual fraud flagged for review — the outcome you want.</p>
-      </article>
-      <article class="explainer-card fn">
-        <strong>Fraud missed</strong>
-        <p>Actual fraud that passed through undetected.</p>
-      </article>
-      <article class="explainer-card fp">
-        <strong>False alarm</strong>
-        <p>Legitimate applicant incorrectly sent to review.</p>
-      </article>
-      <article class="explainer-card tn">
-        <strong>Correctly approved</strong>
-        <p>Legitimate applicant not flagged — friction-free onboarding.</p>
-      </article>
-    </div>
-
-    <div class="matrix-shell">
-      <div class="axis-y">Who they are</div>
-      <div class="matrix-right">
-        <div class="axis-x">What Socure decided</div>
-        <div class="x-labels">
-          <span>Sent to review</span>
-          <span>Auto-approved</span>
-        </div>
-        <div class="matrix-row">
-          <div class="row-label">Fraudulent</div>
-          <article class="cell tp">
-            <span>Fraud caught</span>
-            <strong id="tp-val">—</strong>
-            <small id="tp-sub"></small>
-          </article>
-          <article class="cell fn">
-            <span>Fraud missed</span>
-            <strong id="fn-val">—</strong>
-            <small id="fn-sub"></small>
-          </article>
-        </div>
-        <div class="matrix-row">
-          <div class="row-label">Legitimate</div>
-          <article class="cell fp">
-            <span>False alarm</span>
-            <strong id="fp-val">—</strong>
-            <small id="fp-sub"></small>
-          </article>
-          <article class="cell tn">
-            <span>Correctly approved</span>
-            <strong id="tn-val">—</strong>
-            <small id="tn-sub"></small>
-          </article>
-        </div>
-      </div>
-    </div>
-    <div class="metrics-grid">
-      <article><span>Recall (fraud caught)</span><strong id="m-rec">—</strong><small>Fraud caught ÷ all fraud</small></article>
-      <article><span>Review precision</span><strong id="m-prec">—</strong><small>Fraud caught ÷ sent to review</small></article>
-      <article><span>False alarm rate</span><strong id="m-far">—</strong><small>False alarms ÷ all legitimate</small></article>
-      <article><span>Auto-approval rate</span><strong id="m-auto">—</strong><small>Correctly approved ÷ all legitimate</small></article>
-    </div>
-  </section>
-
-  <!-- ── Outcome summary ───────────────────────────────── -->
-  <section class="summary-grid" aria-label="Scenario summary">
-    <article class="summary-card">
-      <span>Applicants sent to review</span>
-      <strong id="s-flagged">—</strong>
-      <small id="s-flagged-sub">Unique applicants flagged by Socure</small>
-    </article>
-    <article class="summary-card">
-      <span id="s-fraud-title">Fraud in population</span>
-      <strong id="s-fraud-universe">—</strong>
-      <small id="s-fraud-universe-sub">Expected fraud cases in this volume</small>
-    </article>
-    <article class="summary-card">
-      <span>Fraud caught</span>
-      <strong id="s-capture">—</strong>
-      <small id="s-capture-sub">Share of fraud sent to review</small>
-    </article>
-    <article class="summary-card">
-      <span>Review precision</span>
-      <strong id="s-precision">—</strong>
-      <small id="s-precision-sub">Fraud caught ÷ applicants reviewed</small>
-    </article>
-    <article class="summary-card">
-      <span>Review rate</span>
-      <strong id="s-depth">—</strong>
-      <small id="s-depth-sub">Share of applicants flagged</small>
-    </article>
-  </section>
-
-  <!-- ── Socure lift comparison ────────────────────────── -->
-  <section class="comparison-grid" aria-label="Single model vs combined Socure">
-    <article class="comparison-card" id="compare-single">
-      <h3 id="compare-single-title">Best single model alone</h3>
-      <div class="comparison-metrics">
-        <div class="comparison-metric"><span>Fraud caught</span><strong id="cmp-single-recall">—</strong></div>
-        <div class="comparison-metric"><span>Review precision</span><strong id="cmp-single-precision">—</strong></div>
-        <div class="comparison-metric"><span>Fraud cases caught</span><strong id="cmp-single-tp">—</strong></div>
-        <div class="comparison-metric"><span>Sent to review</span><strong id="cmp-single-flagged">—</strong></div>
-      </div>
-    </article>
-    <div class="comparison-delta" aria-label="Improvement">
-      <span>Lift</span>
-      <strong id="cmp-delta-recall">—</strong>
-      <span id="cmp-delta-label">more fraud caught</span>
-    </div>
-    <article class="comparison-card highlight" id="compare-combined">
-      <h3>Combined Socure models</h3>
-      <div class="comparison-metrics">
-        <div class="comparison-metric"><span>Fraud caught</span><strong id="cmp-combined-recall">—</strong></div>
-        <div class="comparison-metric"><span>Review precision</span><strong id="cmp-combined-precision">—</strong></div>
-        <div class="comparison-metric"><span>Fraud cases caught</span><strong id="cmp-combined-tp">—</strong></div>
-        <div class="comparison-metric"><span>Sent to review</span><strong id="cmp-combined-flagged">—</strong></div>
-      </div>
-    </article>
-  </section>
-
-  <!-- ── Total new applicant value (ROI) ───────────────── -->
-  <section class="panel verify-panel" aria-label="Total new applicant value">
-    <div class="section-head">
-      <h2>Total new applicant value</h2>
-    </div>
-    <p class="section-intro">Compare <strong>current state vs. Socure</strong> across the suite to quantify ROI. Each category shows baseline performance, Socure performance, and attributed dollar value. Uses application volume and fraud assumptions from the scenario above.</p>
-
-    <div class="roi-economics">
-      <h3>Economic assumptions</h3>
+    <div class="input-group">
+      <h3>Population</h3>
       <div class="controls-grid">
+        <div>
+          <label for="application-volume">Application volume</label>
+          <input id="application-volume" type="number" min="1" step="1000" value="943500">
+          <small>Total applicants in this scenario.</small>
+        </div>
+        <div>
+          <label id="fraud-rate-label" for="fraud-rate">Fraud rate (%)</label>
+          <input id="fraud-rate" type="number" min="0" max="100" step="0.01" value="2.00">
+          <small id="fraud-rate-help">Per fraud type at 2.00% (workbook default).</small>
+        </div>
         <div>
           <label for="roi-onboarding-share">New applicant share (%)</label>
           <input id="roi-onboarding-share" type="number" min="0" max="100" step="1" value="100">
-          <small>Share of volume in scope (new-user onboarding).</small>
+          <small>Share of volume in scope for onboarding ROI.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-group">
+      <h3>Economics</h3>
+      <div class="controls-grid">
+        <div>
+          <label for="roi-customer-ltv">Customer lifetime value ($)</label>
+          <input id="roi-customer-ltv" type="number" min="0" step="10" value="100">
+          <small>Value per incremental good customer onboarded.</small>
         </div>
         <div>
           <label for="roi-manual-cost">Manual review cost ($)</label>
@@ -816,190 +719,131 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
           <small>Cost per manual KYC / fraud review case.</small>
         </div>
         <div>
-          <label for="roi-customer-ltv">Customer lifetime value ($)</label>
-          <input id="roi-customer-ltv" type="number" min="0" step="10" value="100">
-          <small>Value per incremental good customer onboarded.</small>
-        </div>
-        <div>
           <label for="roi-fraud-cost">Cost per fraud case ($)</label>
           <input id="roi-fraud-cost" type="number" min="0" step="10" value="100">
-          <small>Loss or cost when a fraudulent applicant is onboarded.</small>
+          <small>Loss when a fraudulent applicant is onboarded.</small>
+        </div>
+        <div>
+          <label for="roi-onboarding-mode">Onboarding value in total</label>
+          <select id="roi-onboarding-mode">
+            <option value="ltv" selected>Customer LTV (incremental auto-approved)</option>
+            <option value="ops">Operational savings (reviews avoided)</option>
+          </select>
+          <small>Avoids double-counting the same onboarding lift twice.</small>
         </div>
       </div>
     </div>
 
-    <div class="roi-total-banner">
-      <span>Total new applicant value</span>
-      <strong id="roi-total-value">—</strong>
-      <small id="roi-total-sub">Sum of value across all enabled categories below</small>
-    </div>
-
-    <div class="roi-categories">
-      <article class="roi-category" aria-label="Auto-approval">
-        <div class="roi-category-head">
-          <h3>Auto-approval</h3>
-          <span class="roi-category-value" id="roi-auto-value">—</span>
+    <div class="input-group">
+      <h3>Status quo (current vendor / today)</h3>
+      <div class="controls-grid">
+        <div>
+          <label for="roi-auto-baseline">Auto-approval rate (%)</label>
+          <input id="roi-auto-baseline" type="number" min="0" max="100" step="0.1" value="66">
+          <small>Applicants approved without manual review today.</small>
         </div>
-        <p class="section-intro" style="margin:0 0 12px;font-size:13px">Socure Verify — applicants auto-approved without manual review.</p>
-        <div class="roi-compare">
-          <div class="roi-compare-col">
-            <label for="roi-auto-baseline">Current</label>
-            <input id="roi-auto-baseline" type="number" min="0" max="100" step="0.1" value="66">
-          </div>
-          <div class="roi-compare-delta" id="roi-auto-delta">—</div>
-          <div class="roi-compare-col">
-            <label for="roi-auto-socure">Socure</label>
-            <input id="roi-auto-socure" type="number" min="0" max="100" step="0.1" value="88">
-          </div>
+        <div>
+          <label for="roi-fraud-baseline">Fraud caught (%)</label>
+          <input id="roi-fraud-baseline" type="number" min="0" max="100" step="0.1" value="40">
+          <small>Share of fraud caught before onboarding today.</small>
         </div>
-        <ul class="roi-breakdown">
-          <li><span>Incremental auto-approved</span><strong id="roi-auto-incremental">—</strong></li>
-          <li><span>Customer value (LTV)</span><strong id="roi-auto-ltv-value">—</strong></li>
-        </ul>
-      </article>
-
-      <article class="roi-category" aria-label="Manual review">
-        <div class="roi-category-head">
-          <h3>Manual review</h3>
-          <span class="roi-category-value" id="roi-manual-value">—</span>
+        <div>
+          <label for="roi-manual-baseline">Manual review rate (%)</label>
+          <input id="roi-manual-baseline" type="number" min="0" max="100" step="0.1" value="34">
+          <small>Applicants routed to manual review today.</small>
         </div>
-        <p class="section-intro" style="margin:0 0 12px;font-size:13px">Operational savings from fewer cases routed to manual review.</p>
-        <div class="roi-compare">
-          <div class="roi-compare-col">
-            <label for="roi-manual-baseline">Current</label>
-            <input id="roi-manual-baseline" type="number" min="0" max="100" step="0.1" value="34">
-          </div>
-          <div class="roi-compare-delta" id="roi-manual-delta">—</div>
-          <div class="roi-compare-col">
-            <label for="roi-manual-socure">Socure</label>
-            <input id="roi-manual-socure" type="number" min="0" max="100" step="0.1" value="12">
-          </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <label class="roi-sync-note" style="margin:0">
+            <input id="roi-manual-link-auto" type="checkbox">
+            Link manual rate to 100% − auto-approval
+          </label>
         </div>
-        <label class="roi-sync-note">
-          <input id="roi-manual-link-auto" type="checkbox" checked>
-          Link to auto-approval inverse (100% − auto-approval rate)
-        </label>
-        <ul class="roi-breakdown">
-          <li><span>Reviews avoided</span><strong id="roi-manual-avoided">—</strong></li>
-          <li><span>Review cost savings</span><strong id="roi-manual-savings">—</strong></li>
-        </ul>
-      </article>
-
-      <article class="roi-category" aria-label="Fraud prevention">
-        <div class="roi-category-head">
-          <h3>Fraud prevention</h3>
-          <span class="roi-category-value" id="roi-fraud-value">—</span>
-        </div>
-        <p class="section-intro" style="margin:0 0 12px;font-size:13px">Combined Socure fraud models — fraud caught before onboarding.</p>
-        <div class="roi-compare">
-          <div class="roi-compare-col">
-            <label for="roi-fraud-baseline">Current</label>
-            <input id="roi-fraud-baseline" type="number" min="0" max="100" step="0.1" value="40">
-          </div>
-          <div class="roi-compare-delta" id="roi-fraud-delta">—</div>
-          <div class="roi-compare-col">
-            <label for="roi-fraud-socure">Socure</label>
-            <input id="roi-fraud-socure" type="number" min="0" max="100" step="0.1" value="56.6">
-          </div>
-        </div>
-        <label class="roi-sync-note">
-          <input id="roi-fraud-sync-scenario" type="checkbox" checked>
-          Sync Socure rate from combined fraud caught above
-        </label>
-        <ul class="roi-breakdown">
-          <li><span>Incremental fraud caught</span><strong id="roi-fraud-incremental">—</strong></li>
-          <li><span>Fraud loss avoided</span><strong id="roi-fraud-savings">—</strong></li>
-        </ul>
-      </article>
-    </div>
-  </section>
-
-  <!-- ── Scenario controls ─────────────────────────────── -->
-  <section class="panel" aria-label="Scenario controls">
-    <div class="section-head">
-      <h2>Scenario setup</h2>
-    </div>
-    <p class="section-intro">Set the applicant population and fraud assumptions. Most conversations start with application volume and fraud rate, then tune model depth.</p>
-
-    <div class="controls-grid">
-      <div>
-        <label for="application-volume">Application volume</label>
-        <input id="application-volume" type="number" min="1" step="1000" value="943500">
-        <small>Total applicants in this scenario.</small>
-      </div>
-
-      <div>
-        <label id="fraud-rate-label" for="fraud-rate">Fraud rate (%)</label>
-        <input id="fraud-rate" type="number" min="0" max="100" step="0.01" value="2.00">
-        <small id="fraud-rate-help">Default: 2.00% of applicants are fraudulent.</small>
-      </div>
-
-      <div>
-        <label for="pairwise-overlap">Model overlap (%)</label>
-        <input id="pairwise-overlap" type="number" min="0" max="50" step="0.1" value="15.0">
-        <small>How much two models flag the same applicants. Default: 15%.</small>
-      </div>
-
-      <div>
-        <label for="review-overlap-basis">Review overlap method</label>
-        <select id="review-overlap-basis">
-          <option value="min">Use smaller review rate per pair</option>
-          <option value="average">Use average review rate per pair</option>
-          <option value="none">No review overlap</option>
-          <option value="custom">Custom combined review rate</option>
-        </select>
-        <small>How overlapping flags are deduplicated across models.</small>
-      </div>
-
-      <div id="custom-depth-wrap" class="hidden">
-        <label for="custom-depth">Custom combined review rate (%)</label>
-        <input id="custom-depth" type="number" min="0" max="100" step="0.1" value="7.65">
-        <small>Measured unique review rate when available.</small>
       </div>
     </div>
 
-    <details class="config-details" style="margin-top:16px">
-      <summary>Advanced scenario options</summary>
+    <div class="input-group">
+      <h3>Socure suite performance</h3>
+      <div class="controls-grid">
+        <div>
+          <label for="roi-auto-socure">Auto-approval rate (%)</label>
+          <input id="roi-auto-socure" type="number" min="0" max="100" step="0.1" value="88">
+          <small>Socure Verify — auto-approved without manual review.</small>
+        </div>
+        <div>
+          <label for="roi-fraud-socure">Fraud caught (%)</label>
+          <input id="roi-fraud-socure" type="number" min="0" max="100" step="0.1" value="56.6">
+          <small>Combined Socure fraud models at selected review rates.</small>
+        </div>
+        <div>
+          <label for="roi-manual-socure">Manual review rate (%)</label>
+          <input id="roi-manual-socure" type="number" min="0" max="100" step="0.1" value="12">
+          <small>Applicants still routed to manual review with Socure.</small>
+        </div>
+        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
+          <label class="roi-sync-note" style="margin:0">
+            <input id="roi-fraud-sync-scenario" type="checkbox" checked>
+            Sync fraud caught from enabled models
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <details class="config-details">
+      <summary>Advanced fraud scenario options</summary>
       <div class="controls-grid" style="margin-top:12px">
+        <div>
+          <label for="pairwise-overlap">Model overlap (%)</label>
+          <input id="pairwise-overlap" type="number" min="0" max="50" step="0.1" value="15.0">
+          <small>How much two models flag the same applicants.</small>
+        </div>
+        <div>
+          <label for="review-overlap-basis">Review overlap method</label>
+          <select id="review-overlap-basis">
+            <option value="min">Use smaller review rate per pair</option>
+            <option value="average">Use average review rate per pair</option>
+            <option value="none">No review overlap</option>
+            <option value="custom">Custom combined review rate</option>
+          </select>
+        </div>
+        <div id="custom-depth-wrap" class="hidden">
+          <label for="custom-depth">Custom combined review rate (%)</label>
+          <input id="custom-depth" type="number" min="0" max="100" step="0.1" value="7.65">
+        </div>
         <div>
           <label for="fraud-base-mode">Fraud counting method</label>
           <select id="fraud-base-mode">
-            <option value="global" selected>Single fraud rate for population</option>
-            <option value="perType">Per fraud type (workbook method)</option>
+            <option value="global">Single fraud rate for population</option>
+            <option value="perType" selected>Per fraud type (workbook method)</option>
           </select>
-          <small id="fraud-mode-help">Population mode is simpler for customer conversations.</small>
+          <small id="fraud-mode-help">Workbook method shows true combined model lift.</small>
         </div>
-
-        <div id="global-capture-mode-wrap">
+        <div id="global-capture-mode-wrap" class="hidden">
           <label for="global-capture-mode">Combined fraud catch estimate</label>
           <select id="global-capture-mode">
-            <option value="conservative" selected>Best single model</option>
+            <option value="conservative">Best single model</option>
             <option value="independent">Independent OR estimate</option>
             <option value="pairwise">Pairwise dedupe estimate</option>
             <option value="custom">Custom combined capture</option>
           </select>
-          <small>Used when fraud counting = population mode.</small>
         </div>
-
         <div id="custom-capture-wrap" class="hidden">
           <label for="custom-global-capture">Custom combined fraud catch (%)</label>
-          <input id="custom-global-capture" type="number" min="0" max="100" step="0.1" value="74.14">
-          <small>Use measured combined recall when available.</small>
+          <input id="custom-global-capture" type="number" min="0" max="100" step="0.1" value="56.6">
         </div>
       </div>
     </details>
   </section>
 
-  <!-- ── Model configuration ───────────────────────────── -->
+  <!-- ── Step 2: Model settings ──────────────────────── -->
   <section class="panel" aria-label="Model configuration">
     <div class="model-section-head">
-      <h2>Socure model settings</h2>
+      <h2>2. Socure model settings</h2>
       <button id="add-model" type="button">
         <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add model
       </button>
     </div>
-    <p class="section-intro">Each model uses validated governance tiers — risk depth, fraud capture, precision, and lift at each tier. Pick a tier from the dropdown or adjust review rate manually.</p>
+    <p class="section-intro">Enable models and pick governance tiers. Fraud caught % in step 3 syncs from included models when enabled.</p>
 
     <div id="model-cards" class="model-grid"></div>
 
@@ -1037,6 +881,127 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
       <small>Edit model lookup tables, labels, and workbook checkpoints. Click Apply JSON after editing.</small>
     </details>
   </section>
+
+
+  <!-- ── Step 3: Story (team outputs) ────────────────── -->
+  <section class="panel story-panel verify-panel" aria-label="ROI story">
+    <div class="section-head">
+      <h2>3. Your ROI story</h2>
+      <span class="muted">Outputs</span>
+    </div>
+    <p class="section-intro">Lift vs. status quo across the Socure suite. Share this summary in customer conversations.</p>
+
+    <div class="roi-total-banner">
+      <span>Total new applicant value</span>
+      <strong id="roi-total-value">—</strong>
+      <small id="roi-total-sub">—</small>
+    </div>
+
+    <div class="lift-pills" id="lift-pills">
+      <span class="lift-pill" id="lift-pill-auto">—</span>
+      <span class="lift-pill" id="lift-pill-fraud">—</span>
+      <span class="lift-pill" id="lift-pill-customers">—</span>
+    </div>
+
+    <section class="comparison-grid" aria-label="Status quo vs Socure">
+      <article class="comparison-card sq-baseline">
+        <h3>Status quo</h3>
+        <div class="comparison-metrics">
+          <div class="comparison-metric"><span>Auto-approval</span><strong id="sq-auto">—</strong></div>
+          <div class="comparison-metric"><span>Fraud caught</span><strong id="sq-fraud-capture">—</strong></div>
+          <div class="comparison-metric"><span>Manual review</span><strong id="sq-manual">—</strong></div>
+          <div class="comparison-metric"><span>Good customers</span><strong id="sq-good-customers">—</strong></div>
+          <div class="comparison-metric"><span>Fraud cases caught</span><strong id="sq-fraud-caught">—</strong></div>
+          <div class="comparison-metric"><span>Attributed value</span><strong id="sq-value">—</strong></div>
+        </div>
+      </article>
+      <div class="comparison-delta" aria-label="Net lift">
+        <span>Net lift</span>
+        <strong id="sq-delta-value">—</strong>
+        <span id="sq-delta-label">vs. status quo</span>
+      </div>
+      <article class="comparison-card highlight">
+        <h3>Socure suite</h3>
+        <div class="comparison-metrics">
+          <div class="comparison-metric"><span>Auto-approval</span><strong id="socure-auto">—</strong></div>
+          <div class="comparison-metric"><span>Fraud caught</span><strong id="socure-fraud-capture">—</strong></div>
+          <div class="comparison-metric"><span>Manual review</span><strong id="socure-manual">—</strong></div>
+          <div class="comparison-metric"><span>Good customers</span><strong id="socure-good-customers">—</strong></div>
+          <div class="comparison-metric"><span>Fraud cases caught</span><strong id="socure-fraud-caught">—</strong></div>
+          <div class="comparison-metric"><span>Attributed value</span><strong id="socure-value">—</strong></div>
+        </div>
+      </article>
+    </section>
+
+    <div class="roi-categories" style="margin-top:20px">
+      <article class="roi-category" aria-label="Auto-approval value">
+        <div class="roi-category-head">
+          <h3>Auto-approval</h3>
+          <span class="roi-category-value" id="roi-auto-value">—</span>
+        </div>
+        <p class="section-intro" style="margin:0 0 12px;font-size:13px">Socure Verify — incremental good customers onboarded friction-free.</p>
+        <div class="roi-compare">
+          <div class="roi-compare-col"><label>Current</label><strong id="out-auto-baseline">—</strong></div>
+          <div class="roi-compare-delta" id="roi-auto-delta">—</div>
+          <div class="roi-compare-col"><label>Socure</label><strong id="out-auto-socure">—</strong></div>
+        </div>
+        <ul class="roi-breakdown">
+          <li><span>Incremental auto-approved</span><strong id="roi-auto-incremental">—</strong></li>
+          <li><span>Customer value</span><strong id="roi-auto-ltv-value">—</strong></li>
+        </ul>
+      </article>
+
+      <article class="roi-category" aria-label="Manual review savings">
+        <div class="roi-category-head">
+          <h3>Operational efficiency</h3>
+          <span class="roi-category-value muted" id="roi-manual-value">—</span>
+        </div>
+        <p class="section-intro" style="margin:0 0 12px;font-size:13px">Fewer cases routed to manual review — supporting metric or primary onboarding value.</p>
+        <div class="roi-compare">
+          <div class="roi-compare-col"><label>Current</label><strong id="out-manual-baseline">—</strong></div>
+          <div class="roi-compare-delta" id="roi-manual-delta">—</div>
+          <div class="roi-compare-col"><label>Socure</label><strong id="out-manual-socure">—</strong></div>
+        </div>
+        <ul class="roi-breakdown">
+          <li><span>Reviews avoided</span><strong id="roi-manual-avoided">—</strong></li>
+          <li><span>Review cost savings</span><strong id="roi-manual-savings">—</strong></li>
+        </ul>
+        <p class="roi-note" id="roi-manual-note">—</p>
+      </article>
+
+      <article class="roi-category" aria-label="Fraud prevention value">
+        <div class="roi-category-head">
+          <h3>Fraud prevention</h3>
+          <span class="roi-category-value" id="roi-fraud-value">—</span>
+        </div>
+        <p class="section-intro" style="margin:0 0 12px;font-size:13px">Combined Socure fraud models — fraud stopped before onboarding.</p>
+        <div class="roi-compare">
+          <div class="roi-compare-col"><label>Current</label><strong id="out-fraud-baseline">—</strong></div>
+          <div class="roi-compare-delta" id="roi-fraud-delta">—</div>
+          <div class="roi-compare-col"><label>Socure</label><strong id="out-fraud-socure">—</strong></div>
+        </div>
+        <ul class="roi-breakdown">
+          <li><span>Incremental fraud caught</span><strong id="roi-fraud-incremental">—</strong></li>
+          <li><span>Fraud loss avoided</span><strong id="roi-fraud-savings">—</strong></li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── Fraud operations summary (optional) ───────── -->
+  <details class="advanced-details">
+    <summary>Fraud operations summary</summary>
+    <div class="advanced-body">
+      <p class="section-intro" style="margin:0 0 16px">Operational detail behind the fraud prevention pillar — not part of the customer ROI story.</p>
+      <section class="summary-grid" aria-label="Fraud operations summary">
+        <article class="summary-card"><span>Applicants sent to review</span><strong id="s-flagged">—</strong><small id="s-flagged-sub">Unique applicants flagged by Socure</small></article>
+        <article class="summary-card"><span id="s-fraud-title">Fraud in population</span><strong id="s-fraud-universe">—</strong><small id="s-fraud-universe-sub">Expected fraud cases</small></article>
+        <article class="summary-card"><span>Fraud caught</span><strong id="s-capture">—</strong><small id="s-capture-sub">Share of fraud caught</small></article>
+        <article class="summary-card"><span>Review precision</span><strong id="s-precision">—</strong><small id="s-precision-sub">Fraud caught ÷ reviewed</small></article>
+        <article class="summary-card"><span>Review rate</span><strong id="s-depth">—</strong><small id="s-depth-sub">Share of applicants flagged</small></article>
+      </section>
+    </div>
+  </details>
 
   <!-- ── Warning banner (hidden by default) ────────────── -->
   <div id="warning-banner" class="warning-banner hidden" role="alert"></div>
@@ -1155,10 +1120,10 @@ function buildGovernanceCurve(anchor) {
 
 const DEFAULT_CONFIG = {
   applicationVolume: 943500,
-  fraudBaseMode: "global",
+  fraudBaseMode: "perType",
   fraudRatePerType: 0.02,
   globalCaptureMode: "conservative",
-  customGlobalCapture: 0.7414,
+  customGlobalCapture: 0.566,
   pairwiseOverlap: 0.15,
   reviewOverlapBasis: "min",
   customCombinedDepth: 0.0765,
@@ -1167,8 +1132,9 @@ const DEFAULT_CONFIG = {
     manualReviewCost: 20,
     customerLTV: 100,
     fraudCost: 100,
+    onboardingValueMode: "ltv",
     autoApproval: { baselineRate: 0.66, socureRate: 0.88 },
-    manualReview: { baselineRate: 0.34, socureRate: 0.12, linkToAutoApproval: true },
+    manualReview: { baselineRate: 0.34, socureRate: 0.12, linkToAutoApproval: false },
     fraudPrevention: { baselineRate: 0.40, socureRate: 0.566, syncFromScenario: true }
   },
   models: [
@@ -1468,6 +1434,7 @@ function migrateLegacyVerifyConfig(legacy) {
       socureRate: legacy.manualReviewRate ?? 0.12,
       linkToAutoApproval: false
     },
+    onboardingValueMode: legacy.onboardingValueMode || "ltv",
     fraudPrevention: {
       baselineRate: 0.40,
       socureRate: 0.566,
@@ -1494,6 +1461,7 @@ function applicantValueInputs() {
     manualReviewCost: Math.max(0, num($("roi-manual-cost").value, av.manualReviewCost)),
     customerLTV: Math.max(0, num($("roi-customer-ltv").value, av.customerLTV)),
     fraudCost: Math.max(0, num($("roi-fraud-cost").value, av.fraudCost)),
+    onboardingValueMode: ($("roi-onboarding-mode") && $("roi-onboarding-mode").value) || av.onboardingValueMode || "ltv",
     autoApproval: { baselineRate: autoBaseline, socureRate: autoSocure },
     manualReview: {
       baselineRate: manualBaseline,
@@ -1536,20 +1504,35 @@ function computeApplicantValue(applicationVolume, fraudRate, socureRecall, av) {
   const incrementalFraudCaught = Math.max(0, Math.round(totalFraud * (fraudSocureRate - av.fraudPrevention.baselineRate)));
   const fraudSavings = incrementalFraudCaught * av.fraudCost;
 
-  const totalValue = autoLtvValue + manualSavings + fraudSavings;
+  const sqFraudCaught = Math.round(totalFraud * av.fraudPrevention.baselineRate);
+  const socureFraudCaught = Math.round(totalFraud * fraudSocureRate);
+  const sqGoodCustomers = Math.round(eligible * av.autoApproval.baselineRate);
+  const socureGoodCustomers = Math.round(eligible * av.autoApproval.socureRate);
+
+  const onboardingValue = av.onboardingValueMode === "ops" ? manualSavings : autoLtvValue;
+  const totalValue = onboardingValue + fraudSavings;
+
+  const sqAttributed = sqGoodCustomers * av.customerLTV + sqFraudCaught * av.fraudCost;
+  const socureAttributed = socureGoodCustomers * av.customerLTV + socureFraudCaught * av.fraudCost;
 
   return {
     eligible, totalFraud, fraudSocureRate,
     incrementalAuto, autoLtvValue,
     reviewsAvoided, manualSavings,
     incrementalFraudCaught, fraudSavings,
-    totalValue
+    onboardingValue, totalValue,
+    sqFraudCaught, socureFraudCaught,
+    sqGoodCustomers, socureGoodCustomers,
+    sqAttributed, socureAttributed,
+    autoLiftPp: (av.autoApproval.socureRate - av.autoApproval.baselineRate) * 100,
+    fraudLiftPp: (fraudSocureRate - av.fraudPrevention.baselineRate) * 100
   };
 }
 
 function renderApplicantValue(applicationVolume, fraudRate, socureRecall) {
   const av = applicantValueInputs();
   const r = computeApplicantValue(applicationVolume, fraudRate, socureRecall, av);
+  const set = (id, text) => { const el = $(id); if (el) el.textContent = text };
 
   if (av.fraudPrevention.syncFromScenario) {
     $("roi-fraud-socure").value = pctInput(r.fraudSocureRate, 1);
@@ -1574,30 +1557,72 @@ function renderApplicantValue(applicationVolume, fraudRate, socureRecall) {
     $("roi-manual-socure").style.opacity = "";
   }
 
+  // Status quo vs Socure comparison
+  set("sq-auto", pct(av.autoApproval.baselineRate, 1));
+  set("sq-fraud-capture", pct(av.fraudPrevention.baselineRate, 1));
+  set("sq-manual", pct(av.manualReview.baselineRate, 1));
+  set("sq-good-customers", fmt(r.sqGoodCustomers));
+  set("sq-fraud-caught", fmt(r.sqFraudCaught));
+  set("sq-value", fmtCurrency(r.sqAttributed));
+  set("socure-auto", pct(av.autoApproval.socureRate, 1));
+  set("socure-fraud-capture", pct(r.fraudSocureRate, 1));
+  set("socure-manual", pct(av.manualReview.socureRate, 1));
+  set("socure-good-customers", fmt(r.socureGoodCustomers));
+  set("socure-fraud-caught", fmt(r.socureFraudCaught));
+  set("socure-value", fmtCurrency(r.socureAttributed));
+  set("sq-delta-value", fmtCurrency(r.totalValue));
+  set("sq-delta-label", "incremental value vs. status quo");
+
+  // Lift pills
+  set("lift-pill-auto", `+${fmtDec(r.autoLiftPp, 1)} pp auto-approval`);
+  set("lift-pill-fraud", `+${fmtDec(r.fraudLiftPp, 1)} pp fraud caught`);
+  set("lift-pill-customers", `+${fmt(r.incrementalAuto)} good customers`);
+
+  // Sticky bar value metrics
+  set("bar-total-value", fmtCurrency(r.totalValue));
+  set("bar-auto-lift", `+${fmtDec(r.autoLiftPp, 1)} pp`);
+  set("bar-fraud-lift", `+${fmtDec(r.fraudLiftPp, 1)} pp`);
+  set("bar-incremental-customers", fmt(r.incrementalAuto));
+
+  // Pillar outputs
   const autoDelta = formatDeltaPp(av.autoApproval.baselineRate, av.autoApproval.socureRate, true);
-  $("roi-auto-delta").textContent = autoDelta.text;
+  set("roi-auto-delta", autoDelta.text);
   $("roi-auto-delta").className = "roi-compare-delta" + autoDelta.cls;
-  $("roi-auto-incremental").textContent = fmt(r.incrementalAuto);
-  $("roi-auto-ltv-value").textContent = fmtCurrency(r.autoLtvValue);
-  $("roi-auto-value").textContent = fmtCurrency(r.autoLtvValue);
+  set("out-auto-baseline", pct(av.autoApproval.baselineRate, 1));
+  set("out-auto-socure", pct(av.autoApproval.socureRate, 1));
+  set("roi-auto-incremental", fmt(r.incrementalAuto));
+  set("roi-auto-ltv-value", fmtCurrency(r.autoLtvValue));
+  set("roi-auto-value", av.onboardingValueMode === "ltv" ? fmtCurrency(r.autoLtvValue) : "—");
 
   const manualDelta = formatDeltaPp(av.manualReview.baselineRate, av.manualReview.socureRate, false);
-  $("roi-manual-delta").textContent = manualDelta.text;
+  set("roi-manual-delta", manualDelta.text);
   $("roi-manual-delta").className = "roi-compare-delta" + manualDelta.cls;
-  $("roi-manual-avoided").textContent = fmt(r.reviewsAvoided);
-  $("roi-manual-savings").textContent = fmtCurrency(r.manualSavings);
-  $("roi-manual-value").textContent = fmtCurrency(r.manualSavings);
+  set("out-manual-baseline", pct(av.manualReview.baselineRate, 1));
+  set("out-manual-socure", pct(av.manualReview.socureRate, 1));
+  set("roi-manual-avoided", fmt(r.reviewsAvoided));
+  set("roi-manual-savings", fmtCurrency(r.manualSavings));
+  const manualValEl = $("roi-manual-value");
+  if (manualValEl) {
+    manualValEl.textContent = av.onboardingValueMode === "ops" ? fmtCurrency(r.manualSavings) : fmtCurrency(r.manualSavings);
+    manualValEl.className = "roi-category-value" + (av.onboardingValueMode === "ops" ? "" : " muted");
+  }
+  set("roi-manual-note", av.onboardingValueMode === "ltv"
+    ? "Supporting metric — not added to total (same applicant pool as auto-approval LTV)."
+    : "Included in total as primary onboarding value.");
 
   const fraudDelta = formatDeltaPp(av.fraudPrevention.baselineRate, r.fraudSocureRate, true);
-  $("roi-fraud-delta").textContent = fraudDelta.text;
+  set("roi-fraud-delta", fraudDelta.text);
   $("roi-fraud-delta").className = "roi-compare-delta" + fraudDelta.cls;
-  $("roi-fraud-incremental").textContent = fmt(r.incrementalFraudCaught);
-  $("roi-fraud-savings").textContent = fmtCurrency(r.fraudSavings);
-  $("roi-fraud-value").textContent = fmtCurrency(r.fraudSavings);
+  set("out-fraud-baseline", pct(av.fraudPrevention.baselineRate, 1));
+  set("out-fraud-socure", pct(r.fraudSocureRate, 1));
+  set("roi-fraud-incremental", fmt(r.incrementalFraudCaught));
+  set("roi-fraud-savings", fmtCurrency(r.fraudSavings));
+  set("roi-fraud-value", fmtCurrency(r.fraudSavings));
 
-  $("roi-total-value").textContent = fmtCurrency(r.totalValue);
-  $("roi-total-sub").textContent =
-    `${fmtCurrency(r.autoLtvValue)} auto-approval + ${fmtCurrency(r.manualSavings)} review savings + ${fmtCurrency(r.fraudSavings)} fraud avoided`;
+  set("roi-total-value", fmtCurrency(r.totalValue));
+  const onboardingLabel = av.onboardingValueMode === "ops" ? "ops savings" : "customer LTV";
+  set("roi-total-sub",
+    `${fmtCurrency(r.onboardingValue)} ${onboardingLabel} + ${fmtCurrency(r.fraudSavings)} fraud avoided`);
 }
 
 // ── Interpolation ────────────────────────────────────────────
@@ -2186,53 +2211,33 @@ function update(syncJson = true) {
   $("custom-capture-wrap").classList.toggle("hidden", scenario.fraudBaseMode !== "global" || scenario.globalCaptureMode !== "custom");
 
   // Status pill + labels
-  $("status-pill").textContent = scenario.fraudBaseMode === "global" ? "Population fraud rate" : "Per-type method";
+  $("status-pill").textContent = "Status quo vs Socure";
   $("fraud-rate-label").textContent = scenario.fraudBaseMode === "global" ? "Fraud rate (%)" : "Fraud rate per type (%)";
   $("fraud-rate-help").textContent = scenario.fraudBaseMode === "global"
     ? "Share of applicants expected to be fraudulent."
     : "Workbook-style base rate for each fraud type.";
-  $("s-fraud-title").textContent = scenario.fraudBaseMode === "global" ? "Fraud in population" : "Unique fraud universe";
-  $("s-flagged-sub").textContent = "Unique applicants flagged by Socure";
-  $("s-fraud-universe-sub").textContent = scenario.fraudBaseMode === "global"
+
+  const setIf = (id, text) => { const el = $(id); if (el) el.textContent = text };
+  setIf("s-fraud-title", scenario.fraudBaseMode === "global" ? "Fraud in population" : "Unique fraud universe");
+  setIf("s-flagged-sub", "Unique applicants flagged by Socure");
+  setIf("s-fraud-universe-sub", scenario.fraudBaseMode === "global"
     ? "Fraud rate × application volume"
-    : `${enabledModels.length} fraud type${enabledModels.length === 1 ? "" : "s"}, after overlap`;
-  $("s-capture-sub").textContent = "Share of fraud sent to review";
-  $("s-precision-sub").textContent = "Fraud caught ÷ applicants reviewed";
-  $("s-depth-sub").textContent = "Share of applicants flagged";
+    : `${enabledModels.length} fraud type${enabledModels.length === 1 ? "" : "s"}, after overlap`);
+  setIf("s-capture-sub", "Share of fraud sent to review");
+  setIf("s-precision-sub", "Fraud caught ÷ applicants reviewed");
+  setIf("s-depth-sub", "Share of applicants flagged");
 
-  // Summary cards
-  $("s-depth").textContent = pct(combinedDepth, 2);
-  $("s-flagged").textContent = fmt(flagged);
-  $("s-fraud-universe").textContent = fmt(totalUniqueFraud);
-  $("s-capture").textContent = pct(recall, 1);
-  $("s-precision").textContent = pct(precision, 1);
+  // Summary cards (proof section)
+  const sDepth = $("s-depth"), sFlagged = $("s-flagged"), sFraudU = $("s-fraud-universe");
+  if (sDepth) sDepth.textContent = pct(combinedDepth, 2);
+  if (sFlagged) sFlagged.textContent = fmt(flagged);
+  if (sFraudU) sFraudU.textContent = fmt(totalUniqueFraud);
+  const sCapture = $("s-capture"), sPrec = $("s-precision");
+  if (sCapture) sCapture.textContent = pct(recall, 1);
+  if (sPrec) sPrec.textContent = pct(precision, 1);
 
-  // Sticky bar
-  $("bar-depth").textContent = pct(combinedDepth, 2);
-  $("bar-flagged").textContent = fmt(flagged);
-  $("bar-fraud").textContent = fmt(totalUniqueFraud);
-  $("bar-capture").textContent = pct(recall, 1);
-  $("bar-precision").textContent = pct(precision, 1);
-
-  // Confusion matrix
-  $("tp-val").textContent = fmt(TP);
-  $("tp-sub").textContent = `${pct(recall, 1)} of all fraud`;
-  $("fn-val").textContent = fmt(FN);
-  $("fn-sub").textContent = `${pct(1 - recall, 1)} of all fraud missed`;
-  $("fp-val").textContent = fmt(FP);
-  $("fp-sub").textContent = `${pct(totalGood > 0 ? FP / totalGood : 0, 2)} of legitimate applicants`;
-  $("tn-val").textContent = fmt(TN);
-  $("tn-sub").textContent = `${pct(totalGood > 0 ? TN / totalGood : 0, 1)} of legitimate applicants`;
-  $("m-rec").textContent = pct(recall, 1);
-  $("m-prec").textContent = pct(precision, 1);
-  $("m-far").textContent = pct(totalGood > 0 ? FP / totalGood : 0, 2);
-  $("m-auto").textContent = pct(totalGood > 0 ? TN / totalGood : 0, 1);
-
-  // Comparison
-  renderComparison(enabledModels, scenario, v);
-
-  // Total new applicant value (ROI)
-  renderApplicantValue(scenario.applicationVolume, scenario.fraudRatePerType, recall);
+  // Fraud operations summary (optional detail section)
+  renderApplicantValue(scenario.applicationVolume, combined.totalUniqueFraudRate, recall);
 
   // Per-model mini stats
   config.models.forEach((model, idx) => {
@@ -2328,11 +2333,12 @@ function restoreApplicantValueInputs() {
   $("roi-manual-cost").value = av.manualReviewCost;
   $("roi-customer-ltv").value = av.customerLTV;
   $("roi-fraud-cost").value = av.fraudCost;
+  if ($("roi-onboarding-mode")) $("roi-onboarding-mode").value = av.onboardingValueMode || "ltv";
   $("roi-auto-baseline").value = pctInput(av.autoApproval.baselineRate, 1);
   $("roi-auto-socure").value = pctInput(av.autoApproval.socureRate, 1);
   $("roi-manual-baseline").value = pctInput(av.manualReview.baselineRate, 1);
   $("roi-manual-socure").value = pctInput(av.manualReview.socureRate, 1);
-  $("roi-manual-link-auto").checked = av.manualReview.linkToAutoApproval !== false;
+  $("roi-manual-link-auto").checked = av.manualReview.linkToAutoApproval === true;
   $("roi-fraud-baseline").value = pctInput(av.fraudPrevention.baselineRate, 1);
   $("roi-fraud-socure").value = pctInput(av.fraudPrevention.socureRate, 1);
   $("roi-fraud-sync-scenario").checked = av.fraudPrevention.syncFromScenario !== false;
@@ -2415,6 +2421,7 @@ function init() {
     "global-capture-mode", "custom-global-capture",
     "pairwise-overlap", "review-overlap-basis", "custom-depth",
     "roi-onboarding-share", "roi-manual-cost", "roi-customer-ltv", "roi-fraud-cost",
+    "roi-onboarding-mode",
     "roi-auto-baseline", "roi-auto-socure",
     "roi-manual-baseline", "roi-manual-socure",
     "roi-fraud-baseline", "roi-fraud-socure"
