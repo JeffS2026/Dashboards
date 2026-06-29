@@ -344,10 +344,32 @@ input:focus, select:focus, textarea:focus {
 [data-theme="dark"] select:focus,
 [data-theme="dark"] textarea:focus { box-shadow: 0 0 0 4px rgba(64, 156, 255, 0.18) }
 input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--blue); cursor: pointer }
+input[type="range"] {
+  width: 100%; height: 6px; margin: 0; padding: 0; border: none; background: transparent;
+  accent-color: var(--blue); cursor: pointer;
+}
+input[type="range"]:focus { outline: none; box-shadow: none }
 small { color: var(--text-3); font-size: 12px; line-height: 1.4; margin-top: 6px; display: block; font-weight: 400 }
 
 /* === Controls grid === */
 .controls-grid { display: grid; grid-template-columns: repeat(4, minmax(150px,1fr)); gap: 20px; align-items: start }
+
+/* === POC success criteria (readout Slide 7 layout) === */
+.poc-criteria-table { width: 100%; border-collapse: collapse; font-size: 14px }
+.poc-criteria-table th {
+  text-align: left; font-weight: 600; color: var(--text-2);
+  padding: 10px 12px 8px; border-bottom: 1px solid var(--border);
+  font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.poc-criteria-table td { padding: 14px 12px; vertical-align: top; border-bottom: 1px solid var(--border) }
+.poc-criteria-table tr:last-child td { border-bottom: none }
+.poc-metric-name { font-weight: 600; color: var(--text); white-space: nowrap }
+.poc-metric-cell { display: flex; flex-direction: column; gap: 8px; min-width: 120px }
+.poc-metric-cell input[type="number"] { height: 40px }
+.poc-delta-cell { font-weight: 700; color: var(--blue); white-space: nowrap; padding-top: 18px }
+.poc-delta-cell.negative { color: #c93434 }
+.poc-criteria-options { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 18px; align-items: center }
+.poc-criteria-note { margin: 0 0 12px; font-size: 13px; color: var(--text-2) }
 
 /* === Buttons === */
 .button-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; align-items: center }
@@ -759,56 +781,79 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
     </div>
 
     <div class="input-group">
-      <h3>Status quo (current vendor / today)</h3>
-      <div class="controls-grid">
-        <div>
-          <label for="roi-auto-baseline">Auto-approval rate (%)</label>
-          <input id="roi-auto-baseline" type="number" min="0" max="100" step="0.1" value="66">
-          <small>Applicants approved without manual review today.</small>
-        </div>
-        <div>
-          <label for="roi-fraud-baseline">Fraud caught (%)</label>
-          <input id="roi-fraud-baseline" type="number" min="0" max="100" step="0.1" value="40">
-          <small>Share of fraud caught before onboarding today.</small>
-        </div>
-        <div>
-          <label for="roi-manual-baseline">Manual review rate (%)</label>
-          <input id="roi-manual-baseline" type="number" min="0" max="100" step="0.1" value="34">
-          <small>Applicants routed to manual review today.</small>
-        </div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
-          <label class="roi-sync-note" style="margin:0">
-            <input id="roi-manual-link-auto" type="checkbox">
-            Link manual rate to 100% − auto-approval
-          </label>
-        </div>
-      </div>
-    </div>
-
-    <div class="input-group">
-      <h3>Socure suite performance</h3>
-      <div class="controls-grid">
-        <div>
-          <label for="roi-auto-socure">Auto-approval rate (%)</label>
-          <input id="roi-auto-socure" type="number" min="0" max="100" step="0.1" value="88">
-          <small>Socure Verify — auto-approved without manual review.</small>
-        </div>
-        <div>
-          <label for="roi-fraud-socure">Fraud caught (%)</label>
-          <input id="roi-fraud-socure" type="number" min="0" max="100" step="0.1" value="56.6">
-          <small>Combined Socure fraud models at selected review rates.</small>
-        </div>
-        <div>
-          <label for="roi-manual-socure">Manual review rate (%)</label>
-          <input id="roi-manual-socure" type="number" min="0" max="100" step="0.1" value="12">
-          <small>Applicants still routed to manual review with Socure.</small>
-        </div>
-        <div style="display:flex;align-items:flex-end;padding-bottom:2px">
-          <label class="roi-sync-note" style="margin:0">
-            <input id="roi-fraud-sync-scenario" type="checkbox" checked>
-            Sync fraud caught from enabled models
-          </label>
-        </div>
+      <h3>POC success criteria</h3>
+      <p class="poc-criteria-note">Same Baseline → Socure → Delta layout as readout Slide 7. Auto-approval is the primary slider — manual review follows when linked.</p>
+      <table class="poc-criteria-table" aria-label="POC success criteria">
+        <thead>
+          <tr>
+            <th scope="col">Success criterion</th>
+            <th scope="col">Status quo</th>
+            <th scope="col">Socure</th>
+            <th scope="col">Delta</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="poc-metric-name">Auto-approval</td>
+            <td>
+              <div class="poc-metric-cell">
+                <input id="roi-auto-baseline-range" type="range" min="0" max="100" step="0.1" value="72" aria-label="Status quo auto-approval rate">
+                <input id="roi-auto-baseline" type="number" min="0" max="100" step="0.1" value="72">
+              </div>
+              <small>Approved without manual review today.</small>
+            </td>
+            <td>
+              <div class="poc-metric-cell">
+                <input id="roi-auto-socure-range" type="range" min="0" max="100" step="0.1" value="86" aria-label="Socure auto-approval rate">
+                <input id="roi-auto-socure" type="number" min="0" max="100" step="0.1" value="86">
+              </div>
+              <small>Target with Socure Verify / decisioning.</small>
+            </td>
+            <td class="poc-delta-cell" id="poc-auto-delta">+14.0 pp</td>
+          </tr>
+          <tr>
+            <td class="poc-metric-name">Manual review</td>
+            <td>
+              <div class="poc-metric-cell">
+                <input id="roi-manual-baseline" type="number" min="0" max="100" step="0.1" value="28">
+              </div>
+              <small id="poc-manual-baseline-hint">100% − auto-approval when linked.</small>
+            </td>
+            <td>
+              <div class="poc-metric-cell">
+                <input id="roi-manual-socure" type="number" min="0" max="100" step="0.1" value="14">
+              </div>
+              <small id="poc-manual-socure-hint">100% − auto-approval when linked.</small>
+            </td>
+            <td class="poc-delta-cell" id="poc-manual-delta">−14.0 pp</td>
+          </tr>
+          <tr>
+            <td class="poc-metric-name">Fraud caught</td>
+            <td>
+              <div class="poc-metric-cell">
+                <input id="roi-fraud-baseline" type="number" min="0" max="100" step="0.1" value="40">
+              </div>
+              <small>Share of fraud stopped before onboarding today.</small>
+            </td>
+            <td>
+              <div class="poc-metric-cell">
+                <input id="roi-fraud-socure" type="number" min="0" max="100" step="0.1" value="73.6">
+              </div>
+              <small>Combined Sigma + Synthetic at selected review depth.</small>
+            </td>
+            <td class="poc-delta-cell" id="poc-fraud-delta">—</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="poc-criteria-options">
+        <label class="roi-sync-note" style="margin:0">
+          <input id="roi-manual-link-auto" type="checkbox" checked>
+          Manual review = 100% − auto-approval
+        </label>
+        <label class="roi-sync-note" style="margin:0">
+          <input id="roi-fraud-sync-scenario" type="checkbox" checked>
+          Sync fraud caught from enabled models
+        </label>
       </div>
     </div>
 
@@ -831,7 +876,7 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
         </div>
         <div id="custom-depth-wrap" class="hidden">
           <label for="custom-depth">Custom combined review rate (%)</label>
-          <input id="custom-depth" type="number" min="0" max="100" step="0.1" value="7.65">
+          <input id="custom-depth" type="number" min="0" max="100" step="0.1" value="5.55">
         </div>
         <div>
           <label for="fraud-base-mode">Fraud counting method</label>
@@ -852,7 +897,7 @@ tr:hover td { background: var(--surface-2); transition: background var(--t) }
         </div>
         <div id="custom-capture-wrap" class="hidden">
           <label for="custom-global-capture">Custom combined fraud catch (%)</label>
-          <input id="custom-global-capture" type="number" min="0" max="100" step="0.1" value="56.6">
+          <input id="custom-global-capture" type="number" min="0" max="100" step="0.1" value="73.56">
         </div>
       </div>
     </details>
@@ -1149,76 +1194,76 @@ const DEFAULT_CONFIG = {
   fraudBaseMode: "perType",
   fraudRatePerType: 0.02,
   globalCaptureMode: "conservative",
-  customGlobalCapture: 0.566,
+  customGlobalCapture: 0.7356143945945947,
   pairwiseOverlap: 0.15,
   reviewOverlapBasis: "min",
-  customCombinedDepth: 0.0765,
+  customCombinedDepth: 0.0555,
   applicantValue: {
     onboardingShare: 1.0,
     manualReviewCost: 20,
     customerLTV: 100,
     fraudCost: 100,
     onboardingValueMode: "ltv",
-    autoApproval: { baselineRate: 0.66, socureRate: 0.88 },
-    manualReview: { baselineRate: 0.34, socureRate: 0.12, linkToAutoApproval: false },
-    fraudPrevention: { baselineRate: 0.40, socureRate: 0.566, syncFromScenario: true }
+    autoApproval: { baselineRate: 0.72, socureRate: 0.86 },
+    manualReview: { baselineRate: 0.28, socureRate: 0.14, linkToAutoApproval: true },
+    fraudPrevention: { baselineRate: 0.40, socureRate: 0.7356143945945947, syncFromScenario: true }
   },
   models: [
     {
       id: "three_pf",
       label: "Sigma Identity",
-      sourceName: "Sigma All v4.1 MRM (3PF) — Model Governance documentation (Notion)",
+      sourceName: "SigmaAllv4.1_ModelGovernance_20251116.pdf — Out-of-Time Set",
       governanceReport: "Sigma All v4.1",
-      tierSource: "workbook",
+      tierSource: "mrm-oot",
       enabled: true,
       autoMetrics: true,
       selectedDepth: 0.03,
-      selectedCapture: 0.6228,
-      selectedPrecision: 0.4152,
+      selectedCapture: 0.697,
+      selectedPrecision: 0.464667,
       points: [
-        { riskDepth: 0.01, cumulativeFraudCapture: 0.4138, precision: 0.8276, lift: 41.38 },
-        { riskDepth: 0.02, cumulativeFraudCapture: 0.5491, precision: 0.5491, lift: 27.455 },
-        { riskDepth: 0.03, cumulativeFraudCapture: 0.6228, precision: 0.4152, lift: 20.76 },
-        { riskDepth: 0.04, cumulativeFraudCapture: 0.6743, precision: 0.33715, lift: 16.8575 },
-        { riskDepth: 0.05, cumulativeFraudCapture: 0.7118, precision: 0.28472, lift: 14.236 },
-        { riskDepth: 0.06, cumulativeFraudCapture: 0.7358, precision: 0.24527, lift: 12.263 },
-        { riskDepth: 0.07, cumulativeFraudCapture: 0.7568, precision: 0.21623, lift: 10.811 },
-        { riskDepth: 0.08, cumulativeFraudCapture: 0.7739, precision: 0.193475, lift: 9.674 },
-        { riskDepth: 0.09, cumulativeFraudCapture: 0.7875, precision: 0.175, lift: 8.75 },
-        { riskDepth: 0.10, cumulativeFraudCapture: 0.7993, precision: 0.15986, lift: 7.993 }
+        { riskDepth: 0.01, cumulativeFraudCapture: 0.4611, precision: 0.9222, lift: 46.11 },
+        { riskDepth: 0.02, cumulativeFraudCapture: 0.57905, precision: 0.57905, lift: 28.953 },
+        { riskDepth: 0.03, cumulativeFraudCapture: 0.697, precision: 0.464667, lift: 23.233 },
+        { riskDepth: 0.04, cumulativeFraudCapture: 0.73455, precision: 0.367275, lift: 18.364 },
+        { riskDepth: 0.05, cumulativeFraudCapture: 0.7721, precision: 0.30884, lift: 15.442 },
+        { riskDepth: 0.06, cumulativeFraudCapture: 0.78658, precision: 0.262193, lift: 13.11 },
+        { riskDepth: 0.07, cumulativeFraudCapture: 0.80106, precision: 0.228874, lift: 11.444 },
+        { riskDepth: 0.08, cumulativeFraudCapture: 0.81554, precision: 0.203885, lift: 10.194 },
+        { riskDepth: 0.09, cumulativeFraudCapture: 0.83002, precision: 0.184449, lift: 9.222 },
+        { riskDepth: 0.10, cumulativeFraudCapture: 0.8445, precision: 0.1689, lift: 8.445 }
       ]
     },
     {
       id: "synthetic_v41_final_norm_score",
       label: "Synthetic",
-      sourceName: "Sigma Synthetic v4.1 MRM — Model Governance documentation (Notion)",
+      sourceName: "Sigma-Synthetic_v4.1_ModelGovernance_2025.pdf — Synthetic v4.1",
       governanceReport: "Sigma Synthetic v4.1",
-      tierSource: "workbook",
+      tierSource: "mrm-oot",
       enabled: true,
       autoMetrics: true,
       selectedDepth: 0.03,
       selectedCapture: 0.7414,
-      selectedPrecision: 0.4943,
+      selectedPrecision: 0.494267,
       points: [
-        { riskDepth: 0.01, cumulativeFraudCapture: 0.5156, precision: 1.0000, lift: 51.56 },
-        { riskDepth: 0.02, cumulativeFraudCapture: 0.6646, precision: 0.6646, lift: 33.23 },
-        { riskDepth: 0.03, cumulativeFraudCapture: 0.7414, precision: 0.4943, lift: 24.713 },
-        { riskDepth: 0.04, cumulativeFraudCapture: 0.7909, precision: 0.39545, lift: 19.773 },
+        { riskDepth: 0.01, cumulativeFraudCapture: 0.5166, precision: 1, lift: 51.66 },
+        { riskDepth: 0.02, cumulativeFraudCapture: 0.629, precision: 0.629, lift: 31.45 },
+        { riskDepth: 0.03, cumulativeFraudCapture: 0.7414, precision: 0.494267, lift: 24.713 },
+        { riskDepth: 0.04, cumulativeFraudCapture: 0.7845, precision: 0.39225, lift: 19.613 },
         { riskDepth: 0.05, cumulativeFraudCapture: 0.8276, precision: 0.33104, lift: 16.552 },
-        { riskDepth: 0.06, cumulativeFraudCapture: 0.8452, precision: 0.14087, lift: 7.043 },
-        { riskDepth: 0.07, cumulativeFraudCapture: 0.86312, precision: 0.24661, lift: 12.330 },
+        { riskDepth: 0.06, cumulativeFraudCapture: 0.84536, precision: 0.281787, lift: 14.089 },
+        { riskDepth: 0.07, cumulativeFraudCapture: 0.86312, precision: 0.246606, lift: 12.33 },
         { riskDepth: 0.08, cumulativeFraudCapture: 0.88088, precision: 0.22022, lift: 11.011 },
-        { riskDepth: 0.09, cumulativeFraudCapture: 0.89864, precision: 0.19970, lift: 9.985 },
+        { riskDepth: 0.09, cumulativeFraudCapture: 0.89864, precision: 0.199698, lift: 9.985 },
         { riskDepth: 0.10, cumulativeFraudCapture: 0.9164, precision: 0.18328, lift: 9.164 }
       ]
     },
     {
       id: "one_pf",
       label: "FPF",
-      sourceName: "Sigma FPF Identity Manipulation v1.0 MRM — Model Governance documentation (Notion)",
+      sourceName: "Sigma FPF Identity Manipulation v1.0 MRM — workbook tiers (PDF not in folder)",
       governanceReport: "Sigma FPF Identity Manipulation v1.0",
       tierSource: "workbook",
-      enabled: true,
+      enabled: false,
       autoMetrics: true,
       selectedDepth: 0.03,
       selectedCapture: 0.1871,
@@ -1239,41 +1284,74 @@ const DEFAULT_CONFIG = {
     {
       id: "email_risk",
       label: "Email Risk",
-      sourceName: "Email RiskScore v4 MRM — Model Governance documentation (Notion)",
+      sourceName: "Email Risk_v4_Model_Governance.docx 20260422.pdf — Out-of-Time Set",
       governanceReport: "Email RiskScore v4",
-      tierSource: "estimated",
+      tierSource: "mrm-oot",
       enabled: false,
       autoMetrics: true,
       selectedDepth: 0.03,
-      selectedCapture: 0.38,
-      selectedPrecision: 0.2533,
-      points: buildGovernanceCurve({ capture: 0.38, precision: 0.2533, lift: 12.67 })
+      selectedCapture: 0.5282,
+      selectedPrecision: 0.352133,
+      points: [
+        { riskDepth: 0.01, cumulativeFraudCapture: 0.4138, precision: 0.8276, lift: 41.38 },
+        { riskDepth: 0.02, cumulativeFraudCapture: 0.471, precision: 0.471, lift: 23.55 },
+        { riskDepth: 0.03, cumulativeFraudCapture: 0.5282, precision: 0.352133, lift: 17.607 },
+        { riskDepth: 0.04, cumulativeFraudCapture: 0.5622, precision: 0.2811, lift: 14.055 },
+        { riskDepth: 0.05, cumulativeFraudCapture: 0.5962, precision: 0.23848, lift: 11.924 },
+        { riskDepth: 0.06, cumulativeFraudCapture: 0.61994, precision: 0.206647, lift: 10.332 },
+        { riskDepth: 0.07, cumulativeFraudCapture: 0.64368, precision: 0.183909, lift: 9.195 },
+        { riskDepth: 0.08, cumulativeFraudCapture: 0.66742, precision: 0.166855, lift: 8.343 },
+        { riskDepth: 0.09, cumulativeFraudCapture: 0.69116, precision: 0.153591, lift: 7.68 },
+        { riskDepth: 0.10, cumulativeFraudCapture: 0.7149, precision: 0.14298, lift: 7.149 }
+      ]
     },
     {
       id: "phone_risk",
       label: "Phone Risk",
-      sourceName: "Phone RiskScore v4 MRM — Model Governance documentation (Notion)",
+      sourceName: "Phone RiskScore v4_Model Governance_2024.pdf — Out-of-Time Set",
       governanceReport: "Phone RiskScore v4",
-      tierSource: "estimated",
+      tierSource: "mrm-oot",
       enabled: false,
       autoMetrics: true,
       selectedDepth: 0.03,
-      selectedCapture: 0.44,
-      selectedPrecision: 0.2933,
-      points: buildGovernanceCurve({ capture: 0.44, precision: 0.2933, lift: 14.67 })
+      selectedCapture: 0.5058,
+      selectedPrecision: 0.3372,
+      points: [
+        { riskDepth: 0.01, cumulativeFraudCapture: 0.2986, precision: 0.5972, lift: 29.86 },
+        { riskDepth: 0.02, cumulativeFraudCapture: 0.4022, precision: 0.4022, lift: 20.11 },
+        { riskDepth: 0.03, cumulativeFraudCapture: 0.5058, precision: 0.3372, lift: 16.86 },
+        { riskDepth: 0.04, cumulativeFraudCapture: 0.5516, precision: 0.2758, lift: 13.79 },
+        { riskDepth: 0.05, cumulativeFraudCapture: 0.5974, precision: 0.23896, lift: 11.948 },
+        { riskDepth: 0.06, cumulativeFraudCapture: 0.61786, precision: 0.205953, lift: 10.298 },
+        { riskDepth: 0.07, cumulativeFraudCapture: 0.63832, precision: 0.182377, lift: 9.119 },
+        { riskDepth: 0.08, cumulativeFraudCapture: 0.65878, precision: 0.164695, lift: 8.235 },
+        { riskDepth: 0.09, cumulativeFraudCapture: 0.67924, precision: 0.150942, lift: 7.547 },
+        { riskDepth: 0.10, cumulativeFraudCapture: 0.6997, precision: 0.13994, lift: 6.997 }
+      ]
     },
     {
       id: "address_risk",
       label: "Address Risk",
-      sourceName: "Address RiskScore v4 MRM — Model Governance documentation (Notion)",
+      sourceName: "AddressRisk_v4_Model Governance_2024.pdf — Out-of-Time Set",
       governanceReport: "Address RiskScore v4",
-      tierSource: "estimated",
+      tierSource: "mrm-oot",
       enabled: false,
       autoMetrics: true,
       selectedDepth: 0.03,
-      selectedCapture: 0.32,
-      selectedPrecision: 0.2133,
-      points: buildGovernanceCurve({ capture: 0.32, precision: 0.2133, lift: 10.67 })
+      selectedCapture: 0.4123,
+      selectedPrecision: 0.274867,
+      points: [
+        { riskDepth: 0.01, cumulativeFraudCapture: 0.246, precision: 0.492, lift: 24.6 },
+        { riskDepth: 0.02, cumulativeFraudCapture: 0.32915, precision: 0.32915, lift: 16.457 },
+        { riskDepth: 0.03, cumulativeFraudCapture: 0.4123, precision: 0.274867, lift: 13.743 },
+        { riskDepth: 0.04, cumulativeFraudCapture: 0.45975, precision: 0.229875, lift: 11.494 },
+        { riskDepth: 0.05, cumulativeFraudCapture: 0.5072, precision: 0.20288, lift: 10.144 },
+        { riskDepth: 0.06, cumulativeFraudCapture: 0.53876, precision: 0.179587, lift: 8.979 },
+        { riskDepth: 0.07, cumulativeFraudCapture: 0.57032, precision: 0.162949, lift: 8.147 },
+        { riskDepth: 0.08, cumulativeFraudCapture: 0.60188, precision: 0.15047, lift: 7.523 },
+        { riskDepth: 0.09, cumulativeFraudCapture: 0.63344, precision: 0.140764, lift: 7.038 },
+        { riskDepth: 0.10, cumulativeFraudCapture: 0.665, precision: 0.133, lift: 6.65 }
+      ]
     },
     {
       id: "device_risk",
@@ -1305,36 +1383,36 @@ const DEFAULT_CONFIG = {
   combinedCheckpoints: [
     {
       riskDepth: 0.01,
-      uniqueCasesReviewed: 25500,
-      syntheticCapture: 0.5156,
-      onePFCapture: 0.0749,
-      threePFCapture: 0.4138,
-      totalUniqueFraudCaught: 19237.09798,
-      combinedCapture: 0.3771979996078431,
-      reviewDepth: 0.0255,
-      precision: 0.7543959992156862
+      uniqueCasesReviewed: 18500,
+      syntheticCapture: 0.5166,
+      onePFCapture: 0,
+      threePFCapture: 0.4611,
+      totalUniqueFraudCaught: 18500,
+      combinedCapture: 0.5,
+      reviewDepth: 0.0185,
+      precision: 1
     },
     {
       riskDepth: 0.03,
-      uniqueCasesReviewed: 76500,
+      uniqueCasesReviewed: 55500,
       syntheticCapture: 0.7414,
-      onePFCapture: 0.1871,
-      threePFCapture: 0.6228,
-      totalUniqueFraudCaught: 28875.04278,
-      combinedCapture: 0.5661773094117647,
-      reviewDepth: 0.0765,
-      precision: 0.3774515396078431
+      onePFCapture: 0,
+      threePFCapture: 0.697,
+      totalUniqueFraudCaught: 27218,
+      combinedCapture: 0.7356143945945947,
+      reviewDepth: 0.0555,
+      precision: 0.4904144144144144
     },
     {
       riskDepth: 0.05,
-      uniqueCasesReviewed: 127500,
+      uniqueCasesReviewed: 92500,
       syntheticCapture: 0.8276,
-      onePFCapture: 0.2856,
-      threePFCapture: 0.7118,
-      totalUniqueFraudCaught: 33413.78504,
-      combinedCapture: 0.6551722556862746,
-      reviewDepth: 0.1275,
-      precision: 0.2620689022745098
+      onePFCapture: 0,
+      threePFCapture: 0.7721,
+      totalUniqueFraudCaught: 30077,
+      combinedCapture: 0.812892705945946,
+      reviewDepth: 0.0925,
+      precision: 0.32515675675675676
     }
   ]
 };
@@ -1483,7 +1561,7 @@ function migrateLegacyVerifyConfig(legacy) {
     manualReview: {
       baselineRate: legacy.baselineManualReviewRate ?? 0.34,
       socureRate: legacy.manualReviewRate ?? 0.12,
-      linkToAutoApproval: false
+      linkToAutoApproval: true
     },
     onboardingValueMode: legacy.onboardingValueMode || "ltv",
     fraudPrevention: {
@@ -1492,6 +1570,54 @@ function migrateLegacyVerifyConfig(legacy) {
       syncFromScenario: true
     }
   };
+}
+
+function syncAutoApprovalSliders() {
+  const pairs = [
+    ["roi-auto-baseline", "roi-auto-baseline-range"],
+    ["roi-auto-socure", "roi-auto-socure-range"]
+  ];
+  pairs.forEach(([numId, rangeId]) => {
+    const numEl = $(numId), rangeEl = $(rangeId);
+    if (!numEl || !rangeEl) return;
+    rangeEl.value = clamp(num(numEl.value, 0), 0, 100);
+  });
+}
+
+function bindMetricSlider(numberId, rangeId) {
+  const numEl = $(numberId), rangeEl = $(rangeId);
+  if (!numEl || !rangeEl) return;
+  rangeEl.addEventListener("input", () => {
+    numEl.value = Number(rangeEl.value).toFixed(1).replace(/\.0$/, "");
+    update(false);
+  });
+  numEl.addEventListener("input", () => {
+    rangeEl.value = clamp(num(numEl.value, 0), 0, 100);
+  });
+}
+
+function renderPocCriteriaDeltas(av, fraudSocureRate) {
+  const autoDelta = formatDeltaPp(av.autoApproval.baselineRate, av.autoApproval.socureRate, true);
+  set("poc-auto-delta", autoDelta.text);
+  setClass("poc-auto-delta", "poc-delta-cell" + autoDelta.cls);
+
+  const manualDelta = formatDeltaPp(av.manualReview.baselineRate, av.manualReview.socureRate, false);
+  set("poc-manual-delta", manualDelta.text);
+  setClass("poc-manual-delta", "poc-delta-cell" + manualDelta.cls);
+
+  const fraudDelta = formatDeltaPp(av.fraudPrevention.baselineRate, fraudSocureRate, true);
+  set("poc-fraud-delta", fraudDelta.text);
+  setClass("poc-fraud-delta", "poc-delta-cell" + fraudDelta.cls);
+
+  const linked = av.manualReview.linkToAutoApproval;
+  const hint = linked ? "Derived: 100% − auto-approval." : "Set independently.";
+  set("poc-manual-baseline-hint", hint);
+  set("poc-manual-socure-hint", hint);
+}
+
+function set(id, text) {
+  const el = $(id);
+  if (el) el.textContent = text;
 }
 
 function applicantValueInputs() {
@@ -1684,6 +1810,8 @@ function renderApplicantValue(applicationVolume, fraudRate, socureRecall) {
   const onboardingLabel = av.onboardingValueMode === "ops" ? "ops savings" : "customer LTV";
   set("roi-total-sub",
     `${fmtCurrency(r.onboardingValue)} ${onboardingLabel} + ${fmtCurrency(r.fraudSavings)} fraud avoided`);
+
+  renderPocCriteriaDeltas(av, r.fraudSocureRate);
 }
 
 // ── Interpolation ────────────────────────────────────────────
@@ -2070,7 +2198,7 @@ function renderModelCard(model, idx) {
     </div>
 
     <div class="mini-chart" id="mini-chart-${idx}"></div>
-    <div class="source-note">Source: ${escapeHtml(model.sourceName || model.id)}${model.tierSource === "estimated" ? " · shape-scaled placeholder" : model.tierSource === "workbook" ? " · validated tier table" : ""} · <a href="${GOVERNANCE_DOC_URL}" target="_blank" rel="noopener noreferrer">Governance docs</a></div>
+    <div class="source-note">Source: ${escapeHtml(model.sourceName || model.id)}${model.tierSource === "estimated" ? " · shape-scaled placeholder" : model.tierSource === "mrm-oot" ? " · MRM Out-of-Time tiers" : model.tierSource === "workbook" ? " · validated tier table" : ""} · <a href="${GOVERNANCE_DOC_URL}" target="_blank" rel="noopener noreferrer">Governance docs</a></div>
   `;
 
   // Wire up remove
@@ -2425,10 +2553,11 @@ function restoreApplicantValueInputs() {
   $("roi-auto-socure").value = pctInput(av.autoApproval.socureRate, 1);
   $("roi-manual-baseline").value = pctInput(av.manualReview.baselineRate, 1);
   $("roi-manual-socure").value = pctInput(av.manualReview.socureRate, 1);
-  $("roi-manual-link-auto").checked = av.manualReview.linkToAutoApproval === true;
+  $("roi-manual-link-auto").checked = av.manualReview.linkToAutoApproval !== false;
   $("roi-fraud-baseline").value = pctInput(av.fraudPrevention.baselineRate, 1);
   $("roi-fraud-socure").value = pctInput(av.fraudPrevention.socureRate, 1);
   $("roi-fraud-sync-scenario").checked = av.fraudPrevention.syncFromScenario !== false;
+  syncAutoApprovalSliders();
 }
 
 function resetDefaults() {
@@ -2504,6 +2633,9 @@ function init() {
     renderModelCards();
     renderCheckpointRows();
     update(true);
+
+    bindMetricSlider("roi-auto-baseline", "roi-auto-baseline-range");
+    bindMetricSlider("roi-auto-socure", "roi-auto-socure-range");
 
     [
       "application-volume", "fraud-base-mode", "fraud-rate",
