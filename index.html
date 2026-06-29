@@ -2201,84 +2201,96 @@ function renderModelCard(model, idx) {
     <div class="source-note">Source: ${escapeHtml(model.sourceName || model.id)}${model.tierSource === "estimated" ? " · shape-scaled placeholder" : model.tierSource === "mrm-oot" ? " · MRM Out-of-Time tiers" : model.tierSource === "workbook" ? " · validated tier table" : ""} · <a href="${GOVERNANCE_DOC_URL}" target="_blank" rel="noopener noreferrer">Governance docs</a></div>
   `;
 
-  // Wire up remove
-  const removeBtn = $(`remove-${idx}`);
+  // Query within card — elements are not in document until appendChild completes.
+  const q = (id) => card.querySelector("#" + id);
+
+  const removeBtn = q(`remove-${idx}`);
   if (removeBtn) removeBtn.addEventListener("click", () => removeModel(idx));
 
-  // Wire up model name
-  $(`model-name-${idx}`).addEventListener("input", e => {
+  const nameInput = q(`model-name-${idx}`);
+  if (nameInput) nameInput.addEventListener("input", e => {
     model.label = e.target.value || `Model ${idx + 1}`;
     update(false);
   });
 
-  // Wire up enabled
-  $(`enabled-${idx}`).addEventListener("change", e => {
+  const enabledInput = q(`enabled-${idx}`);
+  if (enabledInput) enabledInput.addEventListener("change", e => {
     model.enabled = e.target.checked;
     renderModelCards();
     update(false);
   });
 
-  // Wire up preset — selects a validated governance tier for this model
-  $(`preset-${idx}`).addEventListener("change", e => {
+  const presetSelect = q(`preset-${idx}`);
+  if (presetSelect) presetSelect.addEventListener("change", e => {
     const p = findGovernancePoint(model.points, e.target.value);
     if (!p) return;
     model.selectedDepth = p.riskDepth;
     model.selectedCapture = p.cumulativeFraudCapture;
     model.selectedPrecision = p.precision;
     model.autoMetrics = true;
-    $(`depth-${idx}`).value = pctInput(model.selectedDepth, 2);
-    $(`capture-${idx}`).value = pctInput(model.selectedCapture, 2);
-    $(`precision-${idx}`).value = pctInput(model.selectedPrecision, 2);
-    $(`auto-${idx}`).checked = true;
-    renderMiniChart(model, $(`mini-chart-${idx}`));
+    const depthEl = q(`depth-${idx}`);
+    const captureEl = q(`capture-${idx}`);
+    const precisionEl = q(`precision-${idx}`);
+    const autoEl = q(`auto-${idx}`);
+    if (depthEl) depthEl.value = pctInput(model.selectedDepth, 2);
+    if (captureEl) captureEl.value = pctInput(model.selectedCapture, 2);
+    if (precisionEl) precisionEl.value = pctInput(model.selectedPrecision, 2);
+    if (autoEl) autoEl.checked = true;
+    renderMiniChart(model, q(`mini-chart-${idx}`));
     update(false);
   });
 
-  // Wire up depth
-  $(`depth-${idx}`).addEventListener("input", e => {
+  const depthInput = q(`depth-${idx}`);
+  if (depthInput) depthInput.addEventListener("input", e => {
     model.selectedDepth = clamp(num(e.target.value, pctInput(model.selectedDepth, 2)) / 100, 0, 1);
     if (model.autoMetrics) {
       const p = interpolatePoint(model.points, model.selectedDepth);
       model.selectedCapture = p.cumulativeFraudCapture;
       model.selectedPrecision = p.precision;
-      $(`capture-${idx}`).value = pctInput(model.selectedCapture, 2);
-      $(`precision-${idx}`).value = pctInput(model.selectedPrecision, 2);
+      const captureEl = q(`capture-${idx}`);
+      const precisionEl = q(`precision-${idx}`);
+      if (captureEl) captureEl.value = pctInput(model.selectedCapture, 2);
+      if (precisionEl) precisionEl.value = pctInput(model.selectedPrecision, 2);
     }
     syncPresetSelect(idx, model);
-    renderMiniChart(model, $(`mini-chart-${idx}`));
+    renderMiniChart(model, q(`mini-chart-${idx}`));
     update(false);
   });
 
-  // Wire up capture
-  $(`capture-${idx}`).addEventListener("input", e => {
+  const captureInput = q(`capture-${idx}`);
+  if (captureInput) captureInput.addEventListener("input", e => {
     model.selectedCapture = clamp(num(e.target.value, pctInput(model.selectedCapture, 2)) / 100, 0, 1);
     model.autoMetrics = false;
-    $(`auto-${idx}`).checked = false;
+    const autoEl = q(`auto-${idx}`);
+    if (autoEl) autoEl.checked = false;
     update(false);
   });
 
-  // Wire up precision
-  $(`precision-${idx}`).addEventListener("input", e => {
+  const precisionInput = q(`precision-${idx}`);
+  if (precisionInput) precisionInput.addEventListener("input", e => {
     model.selectedPrecision = clamp(num(e.target.value, pctInput(model.selectedPrecision || 0, 2)) / 100, 0, 1);
     model.autoMetrics = false;
-    $(`auto-${idx}`).checked = false;
+    const autoEl = q(`auto-${idx}`);
+    if (autoEl) autoEl.checked = false;
     update(false);
   });
 
-  // Wire up auto
-  $(`auto-${idx}`).addEventListener("change", e => {
+  const autoInput = q(`auto-${idx}`);
+  if (autoInput) autoInput.addEventListener("change", e => {
     model.autoMetrics = e.target.checked;
     if (model.autoMetrics) {
       const p = interpolatePoint(model.points, model.selectedDepth);
       model.selectedCapture = p.cumulativeFraudCapture;
       model.selectedPrecision = p.precision;
-      $(`capture-${idx}`).value = pctInput(model.selectedCapture, 2);
-      $(`precision-${idx}`).value = pctInput(model.selectedPrecision, 2);
+      const captureEl = q(`capture-${idx}`);
+      const precisionEl = q(`precision-${idx}`);
+      if (captureEl) captureEl.value = pctInput(model.selectedCapture, 2);
+      if (precisionEl) precisionEl.value = pctInput(model.selectedPrecision, 2);
     }
     update(false);
   });
 
-  renderMiniChart(model, $(`mini-chart-${idx}`));
+  renderMiniChart(model, q(`mini-chart-${idx}`));
   return card;
 }
 
